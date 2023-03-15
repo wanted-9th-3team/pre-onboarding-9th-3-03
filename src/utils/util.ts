@@ -1,23 +1,28 @@
-// 지우고 시작 // util이 없으면 폴더 지워도 됨
-import { ITripInfo } from '../Types'
+import { TCustomChartData, ITableList } from '../Types'
 
-const { localStorage } = window
+const convertRawDataToChartData = (
+  rawData: ITableList,
+  type: 'bar' | 'line'
+) => {
+  const convertedData = Object.entries(rawData).reduce((acc, curr) => {
+    const [key, value] = curr
+    return [
+      ...acc,
+      {
+        id: value.id,
+        x: key,
+        y: type === 'bar' ? value.value_bar : value.value_area,
+      },
+    ]
+  }, [] as TCustomChartData[])
 
-export const getLocalStorageItem = (key: string, defaultValue = null) => {
-  const value = localStorage.getItem(key)
-  return value ? JSON.parse(value) : defaultValue
-}
-
-export const setLocalStorageItem = (key: string, value: ITripInfo[]) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (error) {
-    alert(
-      `로컬 스토리지에 저장할 수 없습니다. 데이터 총 용량을 넘었을 수 있습니다. ${error}`
-    )
+  return {
+    type,
+    label: type === 'bar' ? 'bar' : 'area',
+    data: convertedData,
+    fill: type !== 'bar',
+    yAxisID: type === 'bar' ? 'y' : 'y2',
   }
 }
 
-export const removeLocalStorageItem = (key: string) => {
-  localStorage.removeItem(key)
-}
+export default convertRawDataToChartData
