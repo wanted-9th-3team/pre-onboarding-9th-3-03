@@ -9,3 +9,15 @@ export interface ITripInfo {
   maximumPurchases: number
   registrationDate: string
 }
+
+export interface IDataBase {
+  time: string
+  id: string
+  value_area: number
+  value_bar: number
+}
+export interface IDataType {
+  timeData: string[]
+  areaData: number[]
+  barData: number[]
+}
