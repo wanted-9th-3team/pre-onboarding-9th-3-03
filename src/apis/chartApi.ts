@@ -1,11 +1,12 @@
 import axios from 'axios'
+import { ITableList } from '../Types'
 
 const getChartInfo = async () => {
-  const response = await axios('mock_data.json')
+  const res = await axios('/src/data/mock_data.json')
 
-  if (response.status === 200) {
-    const { data } = response
-    return data
+  if (res.status === 200) {
+    const { response } = res.data
+    return response as ITableList
   }
   return null
 }
