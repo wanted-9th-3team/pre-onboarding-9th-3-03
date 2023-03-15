@@ -13,6 +13,7 @@ import {
 import { Chart, getElementsAtEvent } from 'react-chartjs-2'
 import getChartInfo from '../../apis/chartApi'
 import styles from './index.module.css'
+import { IFilterData } from '../../Types'
 
 ChartJS.register(
   LinearScale,
@@ -25,53 +26,65 @@ ChartJS.register(
   Tooltip
 )
 function LineChart() {
-  const [chartData, setChartData] = useState<any[]>([])
-  const labels = Object.keys(chartData)
-  const ids = Object.keys(chartData).map(
-    (nowDate: any) => chartData[nowDate].id
-  )
+  const [chartData, setChartData] = useState<IFilterData[]>([])
+  const labels = chartData.map(data => data.date)
+  const ids = chartData.map(data => data.id)
   const idSet = Array.from(new Set(ids))
-  const [clickedID, setClickedId] = useState<any[]>(idSet)
+  const clickedID = useRef<string[]>(idSet)
   const chartRef = useRef<ChartJS>(null)
   const changeClickedId = (regionName: string) => {
-    const foundIndex = clickedID.findIndex(region => region === regionName)
+    const foundIndex = clickedID.current.findIndex(
+      region => region === regionName
+    )
 
     if (foundIndex === -1) {
-      setClickedId([...clickedID, regionName])
+      clickedID.current = [...clickedID.current, regionName]
     } else {
-      const tempClickedID = [...clickedID]
+      const tempClickedID = [...clickedID.current]
       tempClickedID.splice(foundIndex, 1)
-      setClickedId(tempClickedID)
+      clickedID.current = tempClickedID
     }
   }
-  const buttonHandler = (e: any) => {
-    changeClickedId(e.target.value)
+  const changeColor = () => {
+    ids.forEach((nowId, idx) => {
+      if (clickedID.current.includes(nowId)) {
+        // chartRef.current.data.datasets[1].backgroundColor[idx] = 'red'
+        // chartRef.current.data.datasets[0].pointBackgroundColor[idx] = 'blue'
+      } else {
+        // chartRef.current.data.datasets[1].backgroundColor[idx] = 'black'
+        // chartRef.current.data.datasets[0].pointBackgroundColor[idx] = 'red'
+      }
+    })
+    chartRef.current?.update()
   }
-  const chartHandler = (e: any) => {
+  const buttonHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
+    changeClickedId(e.currentTarget.value)
+  }
+  const chartHandler = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const elements = chartRef.current
       ? getElementsAtEvent(chartRef.current, e)
       : []
     if (!elements.length) return
     changeClickedId(ids[elements[0].index])
+    changeColor()
   }
   const setChart = async () => {
     const result = await getChartInfo()
     if (result) {
-      setChartData(result.response)
+      const formatedChartData = Object.keys(result.response).map(date => {
+        return {
+          date,
+          id: result.response[date].id,
+          value_area: result.response[date].value_area,
+          value_bar: result.response[date].value_bar,
+        }
+      })
+
+      setChartData(formatedChartData)
     }
   }
-  function setBGColor(color1: string, color2: string) {
-    const bgColor: string[] = []
-
-    ids.forEach(item => {
-      if (clickedID.findIndex(id => item === id) !== -1) {
-        bgColor.push(color2)
-      } else {
-        bgColor.push(color1)
-      }
-    })
-
-    return bgColor
+  function setBGColor(color: string) {
+    return ids.map(() => color)
   }
   useEffect(() => {
     setChart()
@@ -85,18 +98,12 @@ function LineChart() {
     interaction: {
       mode: 'index' as const,
     },
-    animation: {
-      duration: 0,
-    },
     stacked: false,
     plugins: {
       tooltip: {
         callbacks: {
           footer,
         },
-      },
-      colors: {
-        forceOverride: true,
       },
     },
     scales: {
@@ -124,27 +131,27 @@ function LineChart() {
       },
     },
   }
-  const formatData = (label: string[], data: any) => {
+  const formatData = (label: string[], data: IFilterData[]) => {
     const areaData = {
       type: 'line' as const,
       label: 'area',
       borderColor: 'black',
       backgroundColor: 'yellow',
       borderWidth: 1,
-      pointBackgroundColor: setBGColor('red', 'yellow'),
+      pointBackgroundColor: setBGColor('red'),
       fill: true,
-      data: Object.keys(data).map(nowDate => data[nowDate].value_area),
+      data: data.map(nowData => nowData.value_area),
       yAxisID: 'y-area',
     }
     const barData = {
       type: 'bar' as const,
       label: 'bar',
       borderColor: 'black',
-      backgroundColor: setBGColor('black', 'red'),
+      backgroundColor: setBGColor('black'),
       borderWidth: 1,
       hoverBorderColor: 'green',
       hoberBorderWidth: 5,
-      data: Object.keys(data).map(nowDate => data[nowDate].value_bar),
+      data: data.map(nowData => nowData.value_bar),
       yAxisID: 'y-bar',
     }
     return {
@@ -168,7 +175,7 @@ function LineChart() {
           <button
             type="button"
             className={
-              clickedID.findIndex(item => item === region) === -1
+              clickedID.current.findIndex(item => item === region) === -1
                 ? styles.regionButton
                 : styles.regionButtonActive
             }
