@@ -13,6 +13,7 @@ import {
 import { Chart, getElementsAtEvent } from 'react-chartjs-2'
 import getChartInfo from '../../apis/chartApi'
 import styles from './index.module.css'
+
 ChartJS.register(
   LinearScale,
   CategoryScale,
@@ -25,7 +26,7 @@ ChartJS.register(
 )
 function LineChart() {
   const [chartData, setChartData] = useState<any[]>([])
-  const labels = Object.keys(chartData) //date
+  const labels = Object.keys(chartData)
   const ids = Object.keys(chartData).map(
     (nowDate: any) => chartData[nowDate].id
   )
@@ -33,23 +34,24 @@ function LineChart() {
   const [clickedID, setClickedId] = useState<any[]>(idSet)
   const chartRef = useRef<ChartJS>(null)
   const changeClickedId = (regionName: string) => {
-    const foundIndex = clickedID.findIndex((region) => region == regionName)
+    const foundIndex = clickedID.findIndex(region => region === regionName)
 
-    if(foundIndex ==-1){
+    if (foundIndex === -1) {
       setClickedId([...clickedID, regionName])
-    }else{
+    } else {
       const tempClickedID = [...clickedID]
       tempClickedID.splice(foundIndex, 1)
       setClickedId(tempClickedID)
     }
   }
-  const buttonHandler = (e :any) =>{
+  const buttonHandler = (e: any) => {
     changeClickedId(e.target.value)
-
   }
-  const chartHandler = (e :any) =>{
-    const elements = chartRef.current?getElementsAtEvent(chartRef.current, e):[]
-    if(!elements.length) return
+  const chartHandler = (e: any) => {
+    const elements = chartRef.current
+      ? getElementsAtEvent(chartRef.current, e)
+      : []
+    if (!elements.length) return
     changeClickedId(ids[elements[0].index])
   }
   const setChart = async () => {
@@ -58,20 +60,18 @@ function LineChart() {
       setChartData(result.response)
     }
   }
-  function setBGColor(color1 : string, color2 : string){
-
+  function setBGColor(color1: string, color2: string) {
     const bgColor: string[] = []
 
-    ids.forEach((item)=>{
-      if(clickedID.findIndex((id)=> item==id) !== -1){
+    ids.forEach(item => {
+      if (clickedID.findIndex(id => item === id) !== -1) {
         bgColor.push(color2)
-      }else{
+      } else {
         bgColor.push(color1)
       }
     })
-    
-    return bgColor
 
+    return bgColor
   }
   useEffect(() => {
     setChart()
@@ -79,14 +79,14 @@ function LineChart() {
   const footer = (e: any) => {
     return ids[e[0].parsed.x]
   }
-  
+
   const options = {
     responsive: true,
     interaction: {
       mode: 'index' as const,
     },
     animation: {
-      duration : 0
+      duration: 0,
     },
     stacked: false,
     plugins: {
@@ -96,8 +96,8 @@ function LineChart() {
         },
       },
       colors: {
-        forceOverride: true
-      }
+        forceOverride: true,
+      },
     },
     scales: {
       'y-bar': {
@@ -133,7 +133,7 @@ function LineChart() {
       borderWidth: 1,
       pointBackgroundColor: setBGColor('red', 'yellow'),
       fill: true,
-      data: Object.keys(data).map(nowDate => (data[nowDate].value_area)),
+      data: Object.keys(data).map(nowDate => data[nowDate].value_area),
       yAxisID: 'y-area',
     }
     const barData = {
@@ -153,22 +153,33 @@ function LineChart() {
     }
   }
 
-
   return chartData ? (
     <>
-    <Chart
-      datasetIdKey="id"
-      ref={chartRef}
-      type="bar"
-      options={options}
-      data={formatData(labels, chartData)}
-      onClick={chartHandler}
-    />
-    {
-      idSet.map((region) =>{
-        return <button className={clickedID.findIndex((item) => item == region)===-1?styles.regionButton:styles.regionButtonActive} onClick={buttonHandler} key={region} value={region}>{region}</button>
-      })
-    }
+      <Chart
+        datasetIdKey="id"
+        ref={chartRef}
+        type="bar"
+        options={options}
+        data={formatData(labels, chartData)}
+        onClick={chartHandler}
+      />
+      {idSet.map(region => {
+        return (
+          <button
+            type="button"
+            className={
+              clickedID.findIndex(item => item === region) === -1
+                ? styles.regionButton
+                : styles.regionButtonActive
+            }
+            onClick={buttonHandler}
+            key={region}
+            value={region}
+          >
+            {region}
+          </button>
+        )
+      })}
     </>
   ) : null
 }
