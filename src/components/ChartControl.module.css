@@ -1,0 +1,19 @@
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.buttonGroup button {
+  background-color: whitesmoke;
+  color: gray;
+  transition: all 0.2s ease;
+}
+
+.buttonGroup button:active {
+  transform: translateY(1px);
+}
+.buttonGroup button:hover {
+  background-color: wheat;
+}
