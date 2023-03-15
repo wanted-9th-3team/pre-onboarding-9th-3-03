@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from 'react'
+import React, { Component, useCallback, useEffect, useState } from 'react'
 import Chart from 'react-apexcharts'
 import getChartInfo from '../apis/chartApi'
 import filter from '../utils/filter'
@@ -6,8 +6,10 @@ import filter from '../utils/filter'
 function Home() {
   const [xAxisData, setXAxisData] = useState<string[]>()
   const [filterData, setFilterData] = useState<string[]>()
+  const [filter, setFilter] = useState<string[]>()
   const [areaYAxisData, setAreaYAxisData] = useState<number[]>()
   const [barYAxisData, setBarYAxisData] = useState<number[]>()
+  const [clickedRegion, setClickedRegion] = useState<string>('')
 
   useEffect(() => {
     getChartInfo().then(data => {
@@ -15,8 +17,19 @@ function Home() {
       setAreaYAxisData(data.areaYAxisData)
       setBarYAxisData(data.barYAxisData)
       setFilterData(data.filterData)
+      setFilter(data.filter)
     })
   }, [])
+
+  const onClickFilter = useCallback(
+    ({ value, seriesIndex, dataPointIndex, w }) => {
+      console.log(clickedRegion)
+      if (w.config.labels[dataPointIndex] === clickedRegion) {
+        return '#D9534F'
+      }
+    },
+    [clickedRegion]
+  )
 
   const state = {
     series: [
@@ -30,46 +43,43 @@ function Home() {
         type: 'column',
         data: barYAxisData,
       },
-      {
-        name: 'id',
-        data: filterData,
-      },
     ],
     options: {
       chart: {
         height: 350,
-        type: 'line',
+        type: 'area',
         stacked: false,
+        toolbar: {
+          show: false,
+        },
+        events: {
+          dataPointSelection(event, chartContext, config) {
+            console.log(config.w.config.labels[config.dataPointIndex])
+            setClickedRegion(config.w.config.labels[config.dataPointIndex])
+          },
+        },
       },
       stroke: {
         width: [0, 2, 5],
+
         curve: 'smooth',
       },
       plotOptions: {
         bar: {
-          columnWidth: '50%',
+          columnWidth: '60%',
         },
       },
-      // fill: {
-      //   colors: [
-      //     function ({ value, seriesIndex, w }) {
-      //       console.log(w.config)
-      //       if (value < 55) {
-      //         return '#7E36AF'
-      //       }
-      //       if (value >= 55 && value < 80) {
-      //         return '#164666'
-      //       }
-      //       return '#D9534F'
-      //     },
-      //   ],
-      // },
-      labels: xAxisData,
-      markers: {
-        size: 0,
+      fill: {
+        // colors: [onClickFilter],
       },
+      labels: filterData,
+      // markers: {
+      //   size: 10,
+      // },
       xaxis: {
-        type: 'datetime',
+        type: 'category',
+        categories: xAxisData,
+        tickPlacement: 'between',
       },
       yaxis: [
         {
@@ -80,19 +90,19 @@ function Home() {
           axisTicks: {
             show: true,
           },
-          axisBorder: {
-            show: true,
-            color: '#e30000',
-          },
+          // axisBorder: {
+          //   show: true,
+          //   color: '#028FFB',
+          // },
           labels: {
             style: {
-              colors: '#e30000',
+              colors: '#028FFB',
             },
           },
           title: {
             text: 'Area',
             style: {
-              color: '#e30000',
+              color: '#028FFB',
             },
           },
         },
@@ -103,10 +113,10 @@ function Home() {
           axisTicks: {
             show: true,
           },
-          axisBorder: {
-            show: true,
-            color: '#00E396',
-          },
+          // axisBorder: {
+          //   // show: true,
+          //   // color: '#00E396',
+          // },
           labels: {
             style: {
               colors: '#00E396',
@@ -124,31 +134,43 @@ function Home() {
       tooltip: {
         shared: true,
         intersect: false,
-        y: {
-          formatter(y) {
-            return y
-          },
+        custom({ series, seriesIndex, dataPointIndex, w }) {
+          return (
+            `<div class="arrow_box">` +
+            `<div> Bar : ${series[0][dataPointIndex]}</div>` +
+            `<div> Area : ${series[1][dataPointIndex]}</div>` +
+            `</div>`
+          )
         },
+        // x: {
+        //   show: true,
+        //   format: 'yyyy-MM-dd HH:mm:ss',
+        //   // formatter: undefined,
+        // },
+        // y: {
+        //   formatter(y) {
+        //     return y
+        //   },
+        // },
       },
       dataLabels: {
         enabled: false,
-      },
-      chart: {
-        toolbar: {
-          show: false,
-        },
       },
     },
   }
 
   return (
     <div className="app">
-      {/* <section className="btn_wrap">
-        {filterData &&
-          filterData.map((item, index) => {
-            return <button key={index}>{item}</button>
+      <section className="btn_wrap">
+        {filter &&
+          filter.map((item, index) => {
+            return (
+              <button key={index} onClickFilter>
+                {item}
+              </button>
+            )
           })}
-      </section> */}
+      </section>
 
       <div className="row">
         <div className="mixed-chart">
