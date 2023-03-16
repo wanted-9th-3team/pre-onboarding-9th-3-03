@@ -1,8 +1,7 @@
-import React, { Component, useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Chart from 'react-apexcharts'
 import getChartInfo from '../apis/chartApi'
-import filter from '../utils/filter'
-// import styles from './Home.module.css'
+
 function Home() {
   const [xAxisData, setXAxisData] = useState<string[]>()
   const [filterData, setFilterData] = useState<string[]>()
@@ -21,27 +20,19 @@ function Home() {
     })
   }, [])
 
-  const onClickFilter = useCallback(
-    ({ value, seriesIndex, dataPointIndex, w }) => {
-      console.log(clickedRegion)
-      if (w.config.labels[dataPointIndex] === clickedRegion) {
-        return '#D9534F'
-      }
-    },
-    [clickedRegion]
-  )
-
   const state = {
     series: [
       {
         name: 'Area',
         type: 'area',
         data: areaYAxisData,
+        // color: '#028FFB',
       },
       {
         name: 'Bar',
         type: 'column',
         data: barYAxisData,
+        // color: '#00E396',
       },
     ],
     options: {
@@ -52,34 +43,91 @@ function Home() {
         toolbar: {
           show: false,
         },
+        dropShadow: {
+          enabled: false,
+          enabledOnSeries: undefined,
+          top: 0,
+          left: 0,
+          blur: 3,
+          color: '#000',
+          opacity: 0.35,
+        },
+        legend: {
+          show: true,
+          markers: {
+            fillColors: ['#028FFB', '#00E396'],
+          },
+          onItemClick: {
+            toggleDataSeries: true,
+          },
+        },
         events: {
           dataPointSelection(event, chartContext, config) {
-            console.log(config.w.config.labels[config.dataPointIndex])
+            console.log(event)
+            // console.log(config.w.config.labels[config.dataPointIndex])
             setClickedRegion(config.w.config.labels[config.dataPointIndex])
           },
         },
       },
+      markers: {
+        size: 2,
+        // colors: ({ value, seriesIndex, dataPointIndex, w }){
+        //   if (w.config.labels[dataPointIndex] === clickedRegion) {
+        //     return '#e9184b'
+        //   }
+        //   return '#689642'
+        // },
+
+        // colors: 'pink',
+        strokeColors: 'red',
+      },
       stroke: {
         width: [0, 2, 5],
-
         curve: 'smooth',
       },
       plotOptions: {
+        area: {
+          fillTo: 'origin',
+        },
         bar: {
-          columnWidth: '60%',
+          columnWidth: '70%',
         },
       },
-      fill: {
-        // colors: [onClickFilter],
+      colors: [
+        function ({ value, seriesIndex, dataPointIndex, w }) {
+          // console.log(w.config.labels[dataPointIndex] === clickedRegion)
+          if (w.config.labels[dataPointIndex] === clickedRegion) {
+            return '#e9184b'
+          }
+          return '#028FFB'
+        },
+      ],
+      tooltip: {
+        shared: true,
+        intersect: false,
+        custom({ series, seriesIndex, dataPointIndex, w }) {
+          return (
+            `<div class="arrow_box">` +
+            `<div> Bar : ${series[0][dataPointIndex]}</div>` +
+            `<div> Area : ${series[1][dataPointIndex]}</div>` +
+            `<div> id : ${w.config.labels[dataPointIndex]}</div>` +
+            `</div>`
+          )
+        },
+      },
+      dataLabels: {
+        enabled: false,
       },
       labels: filterData,
-      // markers: {
-      //   size: 10,
-      // },
       xaxis: {
         type: 'category',
         categories: xAxisData,
         tickPlacement: 'between',
+        labels: {
+          formatter(value) {
+            return value.slice(10)
+          },
+        },
       },
       yaxis: [
         {
@@ -90,10 +138,6 @@ function Home() {
           axisTicks: {
             show: true,
           },
-          // axisBorder: {
-          //   show: true,
-          //   color: '#028FFB',
-          // },
           labels: {
             style: {
               colors: '#028FFB',
@@ -113,10 +157,6 @@ function Home() {
           axisTicks: {
             show: true,
           },
-          // axisBorder: {
-          //   // show: true,
-          //   // color: '#00E396',
-          // },
           labels: {
             style: {
               colors: '#00E396',
@@ -131,41 +171,30 @@ function Home() {
           },
         },
       ],
-      tooltip: {
-        shared: true,
-        intersect: false,
-        custom({ series, seriesIndex, dataPointIndex, w }) {
-          return (
-            `<div class="arrow_box">` +
-            `<div> Bar : ${series[0][dataPointIndex]}</div>` +
-            `<div> Area : ${series[1][dataPointIndex]}</div>` +
-            `</div>`
-          )
-        },
-        // x: {
-        //   show: true,
-        //   format: 'yyyy-MM-dd HH:mm:ss',
-        //   // formatter: undefined,
-        // },
-        // y: {
-        //   formatter(y) {
-        //     return y
-        //   },
-        // },
-      },
-      dataLabels: {
-        enabled: false,
-      },
     },
   }
 
   return (
     <div className="app">
       <section className="btn_wrap">
+        <button
+          type="button"
+          onClick={() => {
+            setClickedRegion('')
+          }}
+        >
+          전체
+        </button>
         {filter &&
           filter.map((item, index) => {
             return (
-              <button key={index} onClickFilter>
+              <button
+                type="button"
+                key={item}
+                onClick={e => {
+                  setClickedRegion(e.target.innerHTML)
+                }}
+              >
                 {item}
               </button>
             )

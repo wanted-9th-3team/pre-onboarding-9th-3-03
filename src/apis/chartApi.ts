@@ -6,6 +6,7 @@ const getChartInfo = async () => {
   const areaYAxisData: number[] = []
   const barYAxisData: number[] = []
   const filterData: string[] = []
+  const filter: string[] = []
 
   try {
     response = await axios('mock_data.json')
@@ -14,7 +15,7 @@ const getChartInfo = async () => {
     throw new Error(error)
   }
 
-  for (let i = 0; i < Object.keys(response).length; i++) {
+  for (let i = 0; i < Object.keys(response).length; i += 1) {
     const key: string = Object.keys(response)[i]
     const areaValue: number = Object.values(response)[i].value_area
     const barValue: number = Object.values(response)[i].value_bar
@@ -25,9 +26,9 @@ const getChartInfo = async () => {
     barYAxisData.push(barValue)
     filterData.push(idValue)
 
-    // if (!filterData.includes(idValue)) {
-    //   filterData.push(idValue)
-    // }
+    if (!filter.includes(idValue)) {
+      filter.push(idValue)
+    }
   }
 
   return {
@@ -35,6 +36,7 @@ const getChartInfo = async () => {
     areaYAxisData,
     barYAxisData,
     filterData,
+    filter,
   }
 }
 
