@@ -1,4 +1,4 @@
-import { Line } from 'react-chartjs-2'
+import { Chart } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +10,6 @@ import {
   Legend,
   BarElement,
 } from 'chart.js'
-import { IDataBase } from '../Types'
 
 ChartJS.register(
   CategoryScale,
@@ -23,7 +22,7 @@ ChartJS.register(
   BarElement
 )
 
-function ChartView({ dataBaseState }: IDataBase[]) {
+function ChartView({ dataBaseState }: any) {
   const areaData: number[] = dataBaseState.map((data: any) => {
     return data.value_area
   })
@@ -38,29 +37,6 @@ function ChartView({ dataBaseState }: IDataBase[]) {
   const guData: string[] = dataBaseState.map((data: any) => {
     return data.id
   })
-
-  const data = {
-    labels: timeData,
-    datasets: [
-      {
-        type: 'line',
-        label: 'value_area',
-        borderColor: 'rgb(54, 162, 235)',
-        borderWidth: 1,
-        data: areaData,
-        yAxisID: 'y',
-      },
-      {
-        type: 'bar',
-        label: 'value_bar',
-        backgroundColor: 'rgb(255, 99, 132)',
-        data: barData,
-        borderColor: 'red',
-        borderWidth: 2,
-        yAxisID: 'y1',
-      },
-    ],
-  }
 
   const footer = (context: any) => {
     return guData[context[0].parsed.x]
@@ -134,7 +110,32 @@ function ChartView({ dataBaseState }: IDataBase[]) {
   }
   return (
     <div style={{ width: '900px' }}>
-      <Line type="line" data={data} options={options} />
+      <Chart
+        type="line"
+        data={{
+          labels: timeData,
+          datasets: [
+            {
+              type: 'line',
+              label: 'value_area',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 1,
+              data: areaData,
+              yAxisID: 'y',
+            },
+            {
+              type: 'bar',
+              label: 'value_bar',
+              backgroundColor: 'rgb(255, 99, 132)',
+              data: barData,
+              borderColor: 'red',
+              borderWidth: 2,
+              yAxisID: 'y1',
+            },
+          ],
+        }}
+        options={options}
+      />
     </div>
   )
 }
