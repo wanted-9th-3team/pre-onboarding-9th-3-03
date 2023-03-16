@@ -9,10 +9,11 @@ import {
   Legend,
   Tooltip,
   Filler,
+  ChartOptions,
 } from 'chart.js'
 import { Chart, getElementsAtEvent } from 'react-chartjs-2'
 import getChartInfo from '../../apis/chartApi'
-import styles from './index.module.css'
+import ButtonGroup from '../ButtonGroup'
 import { IFilterData } from '../../Types'
 
 ChartJS.register(
@@ -31,7 +32,8 @@ function LineChart() {
   const ids = chartData.map(data => data.id)
   const idSet = Array.from(new Set(ids))
   const clickedID = useRef<string[]>(idSet)
-  const chartRef = useRef<ChartJS>(null)
+  const chartRef = useRef<ChartJS>()
+
   const changeClickedId = (regionName: string) => {
     const foundIndex = clickedID.current.findIndex(
       region => region === regionName
@@ -45,22 +47,25 @@ function LineChart() {
       clickedID.current = tempClickedID
     }
   }
+
   const changeColor = () => {
     ids.forEach((nowId, idx) => {
       if (clickedID.current.includes(nowId)) {
-        // chartRef.current.data.datasets[1].backgroundColor[idx] = 'red'
-        // chartRef.current.data.datasets[0].pointBackgroundColor[idx] = 'blue'
+        chartRef.current.data.datasets[1].backgroundColor[idx] =
+          'rgb(234, 84, 85)'
+        chartRef.current.data.datasets[0].pointBackgroundColor[idx] =
+          'rgb(0, 43, 91)'
       } else {
-        // chartRef.current.data.datasets[1].backgroundColor[idx] = 'black'
-        // chartRef.current.data.datasets[0].pointBackgroundColor[idx] = 'red'
+        chartRef.current.data.datasets[1].backgroundColor[idx] =
+          'rgb(249, 219, 187)'
+        chartRef.current.data.datasets[0].pointBackgroundColor[idx] =
+          'rgb(228, 220, 207)'
       }
     })
     chartRef.current?.update()
   }
-  const buttonHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
-    changeClickedId(e.currentTarget.value)
-  }
-  const chartHandler = (e: React.MouseEvent<HTMLCanvasElement>) => {
+
+  const chartClickHandler = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const elements = chartRef.current
       ? getElementsAtEvent(chartRef.current, e)
       : []
@@ -68,6 +73,7 @@ function LineChart() {
     changeClickedId(ids[elements[0].index])
     changeColor()
   }
+
   const setChart = async () => {
     const result = await getChartInfo()
     if (result) {
@@ -83,22 +89,20 @@ function LineChart() {
       setChartData(formatedChartData)
     }
   }
+
   function setBGColor(color: string) {
     return ids.map(() => color)
   }
-  useEffect(() => {
-    setChart()
-  }, [])
-  const footer = (e: any) => {
-    return ids[e[0].parsed.x]
+
+  const footer = (context: any) => {
+    return ids[context[0].parsed.x]
   }
 
-  const options = {
+  const options: ChartOptions = {
     responsive: true,
     interaction: {
       mode: 'index' as const,
     },
-    stacked: false,
     plugins: {
       tooltip: {
         callbacks: {
@@ -131,26 +135,26 @@ function LineChart() {
       },
     },
   }
+
   const formatData = (label: string[], data: IFilterData[]) => {
     const areaData = {
       type: 'line' as const,
-      label: 'area',
-      borderColor: 'black',
-      backgroundColor: 'yellow',
+      label: 'Area',
+      borderColor: 'rgb(0, 0, 0, 0.7)',
+      backgroundColor: 'rgb(78, 110, 129, 0.5)',
       borderWidth: 1,
-      pointBackgroundColor: setBGColor('red'),
+      pointBackgroundColor: setBGColor('rgb(228, 220, 207)'),
       fill: true,
       data: data.map(nowData => nowData.value_area),
       yAxisID: 'y-area',
     }
     const barData = {
       type: 'bar' as const,
-      label: 'bar',
-      borderColor: 'black',
-      backgroundColor: setBGColor('black'),
+      label: 'Bar',
+      borderColor: 'rgb(255, 255, 255, 0.5)',
+      backgroundColor: setBGColor('rgb(249, 219, 187)'),
       borderWidth: 1,
-      hoverBorderColor: 'green',
-      hoberBorderWidth: 5,
+      hoverBackgroundColor: 'green',
       data: data.map(nowData => nowData.value_bar),
       yAxisID: 'y-bar',
     }
@@ -160,6 +164,10 @@ function LineChart() {
     }
   }
 
+  useEffect(() => {
+    setChart()
+  }, [])
+
   return chartData ? (
     <>
       <Chart
@@ -168,25 +176,13 @@ function LineChart() {
         type="bar"
         options={options}
         data={formatData(labels, chartData)}
-        onClick={chartHandler}
+        onClick={chartClickHandler}
       />
-      {idSet.map(region => {
-        return (
-          <button
-            type="button"
-            className={
-              clickedID.current.findIndex(item => item === region) === -1
-                ? styles.regionButton
-                : styles.regionButtonActive
-            }
-            onClick={buttonHandler}
-            key={region}
-            value={region}
-          >
-            {region}
-          </button>
-        )
-      })}
+      <ButtonGroup
+        idSet={idSet}
+        changeClickedId={changeClickedId}
+        changeColor={changeColor}
+      />
     </>
   ) : null
 }
