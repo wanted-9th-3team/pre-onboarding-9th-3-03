@@ -35,6 +35,10 @@ function ChartView({ dataBaseState }: IDataBase[]) {
     return data.time
   })
 
+  const guData: string[] = dataBaseState.map((data: any) => {
+    return data.id
+  })
+
   const data = {
     labels: timeData,
     datasets: [
@@ -58,6 +62,10 @@ function ChartView({ dataBaseState }: IDataBase[]) {
     ],
   }
 
+  const footer = (context: any) => {
+    return guData[context[0].parsed.x]
+  }
+
   const options = {
     responsive: true,
     interaction: {
@@ -65,7 +73,13 @@ function ChartView({ dataBaseState }: IDataBase[]) {
       intersect: false,
     },
     stacked: false,
-
+    plugins: {
+      tooltip: {
+        callbacks: {
+          footer,
+        },
+      },
+    },
     scales: {
       y: {
         type: 'linear' as const,
