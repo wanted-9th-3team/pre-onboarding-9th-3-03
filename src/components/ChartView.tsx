@@ -10,7 +10,7 @@ import {
   Legend,
   BarElement,
 } from 'chart.js'
-import { IDataType } from '../Types'
+import { IDataBase } from '../Types'
 
 ChartJS.register(
   CategoryScale,
@@ -23,7 +23,18 @@ ChartJS.register(
   BarElement
 )
 
-function ChartView({ timeData, areaData, barData }: IDataType) {
+function ChartView({ dataBaseState }: IDataBase[]) {
+  const areaData: number[] = dataBaseState.map((data: any) => {
+    return data.value_area
+  })
+  const barData: number[] = dataBaseState.map((data: any) => {
+    return data.value_bar
+  })
+
+  const timeData: string[] = dataBaseState.map((data: any) => {
+    return data.time
+  })
+
   const data = {
     labels: timeData,
     datasets: [
@@ -54,6 +65,7 @@ function ChartView({ timeData, areaData, barData }: IDataType) {
       intersect: false,
     },
     stacked: false,
+
     scales: {
       y: {
         type: 'linear' as const,
