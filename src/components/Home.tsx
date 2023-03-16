@@ -1,7 +1,12 @@
 import styles from './Home.module.css'
+import LineChart from './LineChart'
 
 function Home() {
-  return <h1 className={styles.homeHeader}>Hello World</h1>
+  return (
+    <div className={styles.homeHeader}>
+      <LineChart />
+    </div>
+  )
 }
 
 export default Home
