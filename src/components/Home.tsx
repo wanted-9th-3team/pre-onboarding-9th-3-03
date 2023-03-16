@@ -2,24 +2,17 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Home.module.css'
 import Chart from './Chart'
+import { IChartList } from '../Types'
 
-function Home({ apidata }: any) {
+interface UseChartDataProps {
+  data: IChartList
+}
+function Home({ data }: UseChartDataProps) {
   const [name, setName] = useState('')
-
-  const Itmes: any[] = apidata
-  // const [item, setitem] = useState(apidata)
-
-  // console.log(Itmes)
-  // console.log(Object.entries(Itmes).map(el => el))
-  // const OP = Object.values(Itmes).map(el => el)
-  // console.log(OP)
-  // const OOR = OP.map(el => el.value_area)
-  // console.log(OOR)
+  const Itmes = data
 
   /* 필터기능 코드 */
   const JK = Object.values(Itmes).map(el => el.id)
-  // console.log(JK)
-  // const GG = new Set([...JK])
   const GGK = [...new Set(JK)]
 
   return (
@@ -33,8 +26,7 @@ function Home({ apidata }: any) {
       <Link to={`/${name}`}>
         <button type="button">필터</button>
       </Link>
-
-      <Chart apidata={apidata} GGK={GGK} />
+      <Chart data={data} />
     </div>
   )
 }
