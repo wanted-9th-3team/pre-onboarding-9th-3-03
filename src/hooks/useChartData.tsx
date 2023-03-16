@@ -1,5 +1,6 @@
+import { ChartDataset } from 'chart.js'
 import { useCallback, useEffect, useState } from 'react'
-import { TChartDataset, ITableList } from '../Types'
+import { ITableList } from '../Types'
 import convertRawDataToChartData from '../utils/util'
 
 export const COLOR_TEMPLATE = {
@@ -26,8 +27,9 @@ interface UseChartDataProps {
 
 function useChartData({ data }: UseChartDataProps) {
   const [label, setLabel] = useState<string[]>([])
-  const [barDataSet, setBarDataSet] = useState<TChartDataset>()
-  const [areaDataSet, setAreaDataSet] = useState<TChartDataset>()
+  const [barDataSet, setBarDataSet] = useState<ChartDataset>()
+  const [areaDataSet, setAreaDataSet] = useState<ChartDataset>()
+  const idLists = Object.values(data).map(list => list.id)
 
   const setLabelData = (rawData: ITableList) => {
     const labelData = Object.keys(rawData)
@@ -37,7 +39,7 @@ function useChartData({ data }: UseChartDataProps) {
 
   const barDataSettingHandler = useCallback((rawData: ITableList) => {
     const barSets = convertRawDataToChartData(rawData, 'bar')
-    const styleWrappedBar: TChartDataset = {
+    const styleWrappedBar: ChartDataset = {
       ...barSets,
       backgroundColor: new Array(100).fill(COLOR_TEMPLATE.bar.barOriginColor),
       borderColor: new Array(100).fill(COLOR_TEMPLATE.bar.barBorderColor),
@@ -51,7 +53,7 @@ function useChartData({ data }: UseChartDataProps) {
 
   const areaDataSettingHandler = useCallback((rawData: ITableList) => {
     const areaSets = convertRawDataToChartData(rawData, 'line')
-    const styleWrappedBar: TChartDataset = {
+    const styleWrappedArea: ChartDataset = {
       ...areaSets,
       backgroundColor: COLOR_TEMPLATE.area.areaBgColor,
       pointBackgroundColor: new Array(100).fill(
@@ -63,7 +65,7 @@ function useChartData({ data }: UseChartDataProps) {
       pointBorderColor: 'black',
       pointRadius: 3.5,
     }
-    setAreaDataSet(styleWrappedBar)
+    setAreaDataSet(styleWrappedArea)
   }, [])
 
   const colorChangeHandler = (colorTable: string[][]) => {
@@ -91,7 +93,13 @@ function useChartData({ data }: UseChartDataProps) {
     barDataSettingHandler(data)
   }, [data, areaDataSettingHandler, barDataSettingHandler])
 
-  return { barDataSet, areaDataSet, label, colorChangeHandler }
+  return {
+    barDataSet,
+    areaDataSet,
+    label,
+    idLists,
+    colorChangeHandler,
+  }
 }
 
 export default useChartData

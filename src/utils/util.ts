@@ -1,20 +1,13 @@
-import { TCustomChartData, ITableList } from '../Types'
+import { ITableList } from '../Types'
 
 const convertRawDataToChartData = (
   rawData: ITableList,
   type: 'bar' | 'line'
 ) => {
   const convertedData = Object.entries(rawData).reduce((acc, curr) => {
-    const [key, value] = curr
-    return [
-      ...acc,
-      {
-        id: value.id,
-        x: key,
-        y: type === 'bar' ? value.value_bar : value.value_area,
-      },
-    ]
-  }, [] as TCustomChartData[])
+    const value = curr[1]
+    return [...acc, type === 'bar' ? value.value_bar : value.value_area]
+  }, [] as number[])
 
   return {
     type,

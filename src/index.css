@@ -7,7 +7,6 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-
 button {
   border: 1px solid darkgray;
   border-radius: 8px;
@@ -16,4 +15,8 @@ button {
   font-weight: bold;
   font-family: inherit;
   cursor: pointer;
+}
+
+button.clicked {
+  background-color: wheat;
 }

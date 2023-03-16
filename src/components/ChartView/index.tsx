@@ -13,15 +13,12 @@ import {
   Filler,
   ChartOptions,
   TimeScale,
-  ChartTypeRegistry,
-  Point,
-  BubbleDataPoint,
 } from 'chart.js'
 import { Chart, getElementAtEvent } from 'react-chartjs-2'
 import { MouseEvent, useRef } from 'react'
-import useChartData, { COLOR_TEMPLATE } from '../hooks/useChartData'
-import { ITableList, TCustomChartData } from '../Types'
-import ChartControl from './ChartControl'
+import useChartData, { COLOR_TEMPLATE } from '../../hooks/useChartData'
+import { ITableList } from '../../Types'
+import ChartControl from '../ChartControl'
 
 ChartJS.register(
   TimeScale,
@@ -41,40 +38,6 @@ interface ChartViewProps {
   chartData: ITableList
 }
 
-const options: ChartOptions = {
-  responsive: true,
-  plugins: {
-    title: {
-      display: true,
-      text: 'Chart.js Chart',
-    },
-    tooltip: {
-      mode: 'index',
-      callbacks: {
-        beforeBody(tooltipItems) {
-          const rawData = tooltipItems[0].raw as TCustomChartData
-          return rawData.id
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      type: 'time',
-      time: { unit: 'second' },
-    },
-    y: { beginAtZero: true, title: { display: true, text: 'Bar' } },
-    y2: {
-      position: 'right' as const,
-      title: { display: true, text: 'Area' },
-      max: 200,
-    },
-  },
-  layout: {
-    padding: 20,
-  },
-}
-
 function ChartView({ chartData }: ChartViewProps) {
   const baseChartColor = [
     new Array(100).fill(COLOR_TEMPLATE.bar.barOriginColor),
@@ -85,18 +48,12 @@ function ChartView({ chartData }: ChartViewProps) {
     ...new Set(Object.values(chartData).map(chart => chart.id)),
   ]
 
-  const chartRef =
-    useRef<
-      ChartJS<
-        keyof ChartTypeRegistry,
-        TCustomChartData[] &
-          (number | Point | [number, number] | BubbleDataPoint | null)[]
-      >
-    >(null)
+  const chartRef = useRef<ChartJS>(null)
 
-  const { barDataSet, areaDataSet, label, colorChangeHandler } = useChartData({
-    data: chartData,
-  })
+  const { barDataSet, areaDataSet, label, idLists, colorChangeHandler } =
+    useChartData({
+      data: chartData,
+    })
 
   const data = {
     labels: label,
@@ -114,11 +71,11 @@ function ChartView({ chartData }: ChartViewProps) {
       return
     }
 
-    const filteredRegionDataLists = chart.config.data.datasets.map(
+    const filteredRegionColorLists = chart.config.data.datasets.map(
       chartValue => {
         if (chartValue.type === 'bar') {
-          const val = chartValue.data.reduce((acc, curr) => {
-            if (curr.id === name) {
+          const val = chartValue.data.reduce((acc, curr, idx) => {
+            if (idLists[idx] === name) {
               return [...acc, COLOR_TEMPLATE.bar.selectedBarColor]
             }
             return [...acc, COLOR_TEMPLATE.bar.nonSelectedBarColor]
@@ -126,8 +83,8 @@ function ChartView({ chartData }: ChartViewProps) {
           return val
         }
 
-        const val = chartValue.data.reduce((acc, curr) => {
-          if (curr.id === name) {
+        const val = chartValue.data.reduce((acc, curr, idx) => {
+          if (idLists[idx] === name) {
             return [...acc, COLOR_TEMPLATE.area.selectedAreaColor]
           }
           return [...acc, COLOR_TEMPLATE.area.nonSelectedAreaColor]
@@ -136,7 +93,7 @@ function ChartView({ chartData }: ChartViewProps) {
       }
     )
 
-    colorChangeHandler(filteredRegionDataLists)
+    colorChangeHandler(filteredRegionColorLists)
   }
 
   const chartClickHandler = (event: MouseEvent<HTMLCanvasElement>) => {
@@ -149,9 +106,43 @@ function ChartView({ chartData }: ChartViewProps) {
     if (!ChartEventElement.length) return
 
     const { index } = ChartEventElement[0]
-    const clickedRegion = chart.data.datasets[0].data[index]
+    const clickedRegion = idLists[index]
 
-    if (clickedRegion.id) clickButtonHanlder(clickedRegion.id)
+    if (clickedRegion) clickButtonHanlder(clickedRegion)
+  }
+
+  const options: ChartOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Chart.js Chart',
+      },
+      tooltip: {
+        mode: 'index',
+        callbacks: {
+          beforeBody(tooltipItems) {
+            const regionIndex = tooltipItems[0].dataIndex
+            return idLists[regionIndex]
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'second' },
+      },
+      y: { beginAtZero: true, title: { display: true, text: 'Bar' } },
+      y2: {
+        position: 'right' as const,
+        title: { display: true, text: 'Area' },
+        max: 200,
+      },
+    },
+    layout: {
+      padding: 20,
+    },
   }
 
   return (
