@@ -1,29 +1,26 @@
 import ApexChart from 'react-apexcharts'
-import { useParams, useSearchParams } from 'react-router-dom'
-
-interface Iname {
-  name: string
-}
+import { useParams } from 'react-router-dom'
+import { IChartList } from '../Types'
 
 interface Ifilter {
   id: string
   value_area: number
   value_bar: number
 }
-function Chart({ apidata }: any) {
+interface UseChartDataProps {
+  data: IChartList
+}
+function Chart({ data }: UseChartDataProps) {
   const { id } = useParams()
 
-  const DataEntries: any[] = apidata ? Object.entries(apidata) : []
+  // const DataEntries: any[] = data ? Object.entries(data) : []
 
-  const filterId =
-    id !== undefined
-      ? DataEntries.filter(n => n.find((k: any) => k.id === id))
-      : DataEntries
-  // console.log(AS.map(el => el[0]))
+  // const filterId =
+  //   id !== undefined
+  //     ? DataEntries.filter(n => n.find((k: any) => k.id === id))
+  //     : DataEntries
 
-  // console.log(PPP)
-
-  const KKK: Ifilter[] = apidata ? Object.values(apidata) : []
+  const KKK: Ifilter[] = data ? Object.values(data) : []
 
   // const filtered =
   //   id !== undefined
@@ -54,9 +51,9 @@ function Chart({ apidata }: any) {
   //   },
   // ]
 
-  const color = Object.values(KKK).filter(names => names.id === id)
-    ? ['blue', 'pink']
-    : ['#d4526e', '#d4526e']
+  // const color = Object.values(KKK).filter(names => names.id === id)
+  //   ? ['blue', 'pink']
+  //   : ['#d4526e', '#d4526e']
 
   // const KKKF = function () {
   //   Object.values(KKK).map(names => (names.id === id ? '#FF0000' : '#02DFDE'))
@@ -79,14 +76,12 @@ function Chart({ apidata }: any) {
             color: Object.values(KKK).filter(names => names.id === id)
               ? 'orange'
               : 'red',
-            // color: ' pink',
           },
         ]}
         options={{
           chart: {
             height: 100,
             width: 100,
-            // stacked: false,
           },
 
           plotOptions: {
@@ -145,7 +140,7 @@ function Chart({ apidata }: any) {
           ],
           xaxis: {
             type: 'category',
-            categories: Object.keys(apidata).map(el => el),
+            categories: Object.keys(data).map(el => el),
             tickAmount: 10,
             labels: {
               datetimeFormatter: {
