@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const getChartInfo = async () => {
-  const response = await axios('mock_data.json')
+export const getChartInfo = async () => {
+  const response = await axios('src/data/mock_data.json')
 
   if (response.status === 200) {
     const { data } = response
@@ -10,4 +10,8 @@ const getChartInfo = async () => {
   return null
 }
 
-export default getChartInfo
+export const fetchChartInfo = async () => {
+  const res = await fetch('src/data/mock_data.json')
+  const json = res.json()
+  return json
+}
