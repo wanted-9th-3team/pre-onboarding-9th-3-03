@@ -78,12 +78,12 @@ function useChartData({ data }: UseChartDataProps) {
       ...barDataSet,
       backgroundColor: barColorData,
     }
-    setBarDataSet(newBarDataSet)
-
     const newAreaDataSet = {
       ...areaDataSet,
       pointBackgroundColor: areaColorData,
     }
+
+    setBarDataSet(newBarDataSet)
     setAreaDataSet(newAreaDataSet)
   }
 
