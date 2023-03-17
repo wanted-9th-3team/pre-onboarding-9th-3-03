@@ -21,13 +21,13 @@ function App() {
   return (
     <div
       style={{
-        padding: '20px',
+        padding: '10px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
       }}
     >
-      <h1 className="homeHeader">Daliy Chart</h1>
+      <h1 className="homeHeader">Flexsys Chart</h1>
       <div style={{ width: '1000px' }}>
         <ChartView chartData={tableData} />
       </div>
