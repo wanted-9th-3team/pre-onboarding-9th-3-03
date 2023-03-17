@@ -13,4 +13,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.ts'],
   },
+  publicDir: './src/data',
+  base: '/pre-onboarding-9th-3-03/',
 })

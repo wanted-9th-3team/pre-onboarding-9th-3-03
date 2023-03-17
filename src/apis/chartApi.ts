@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ITableList } from '../Types'
 
 const getChartInfo = async () => {
-  const res = await axios('/src/data/mock_data.json')
+  const res = await axios('mock_data.json')
 
   if (res.status === 200) {
     const { response } = res.data
