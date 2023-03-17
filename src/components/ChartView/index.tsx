@@ -116,7 +116,9 @@ function ChartView({ chartData }: ChartViewProps) {
     plugins: {
       title: {
         display: true,
-        text: 'Chart.js Chart',
+      },
+      legend: {
+        position: 'top',
       },
       tooltip: {
         mode: 'index',
@@ -139,9 +141,6 @@ function ChartView({ chartData }: ChartViewProps) {
         title: { display: true, text: 'Area' },
         max: 200,
       },
-    },
-    layout: {
-      padding: 20,
     },
   }
 
